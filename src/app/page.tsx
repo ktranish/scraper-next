@@ -138,6 +138,7 @@ export default function Page() {
                       ?.date.toISOString() ?? new Date().toISOString()
                   }
                 >
+                  Scraped{" "}
                   {formatDistanceToNow(
                     drafts.find((_, index) => index === currentTab)?.date ??
                       new Date(),
