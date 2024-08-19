@@ -2,7 +2,7 @@
 
 const CONTENT_TYPE_JSON = "application/json";
 
-async function handleResponse(res: Response): Promise<any> {
+async function handleResponse(res: Response) {
   // Determine the content type of the response
   const contentType = res.headers.get("Content-Type")?.toLowerCase();
 

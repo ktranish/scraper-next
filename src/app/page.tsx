@@ -1,95 +1,27 @@
 "use client";
 
+import { useScrapeForm } from "@/hooks/useScrapeForm";
 import { cn } from "@/utils/cn";
 import {
   ArrowTopRightOnSquareIcon,
   Square2StackIcon,
 } from "@heroicons/react/24/outline";
-import { useMutation } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
 import { AnimatePresence, motion } from "framer-motion";
-import { useState } from "react";
-import { SubmitHandler, useForm } from "react-hook-form";
 import toast from "react-hot-toast";
-import { extract, scrape } from "./actions";
 
 export default function Page() {
-  const [currentTab, setCurrentTab] = useState(0);
-  const [drafts, setDrafts] = useState<{ draft: string; date: Date }[]>([]);
-  const [tabs, setTabs] = useState<{ tab: string; selector: string }[]>([]);
-
-  const { register, handleSubmit, watch, setValue } = useForm<{
-    url: string;
-    selector: string;
-  }>();
-
-  const url = watch("url");
-  const selector = watch("selector");
-
-  const scrapeMutation = useMutation({
-    mutationFn: async () => scrape(url.replaceAll("https://", "")),
-    onSuccess: (data) => {
-      setCurrentTab(tabs.length);
-      setValue("url", "");
-      setTabs([
-        ...tabs,
-        {
-          tab: url.replaceAll("https://", ""),
-          selector: "",
-        },
-      ]);
-      setDrafts([
-        ...drafts,
-        {
-          draft: data,
-          date: new Date(),
-        },
-      ]);
-    },
-    onError: (err) => console.error(err),
-  });
-
-  const extractMutation = useMutation({
-    mutationFn: async () =>
-      extract(
-        "https://" + tabs.find((_, index) => index === currentTab)?.tab,
-        selector,
-      ),
-    onSuccess: (data) => {
-      setCurrentTab(tabs.length);
-      setValue("selector", "");
-      setTabs([
-        ...tabs,
-        {
-          tab: tabs[currentTab].tab,
-          selector,
-        },
-      ]);
-      setDrafts([
-        ...drafts,
-        {
-          draft: data,
-          date: new Date(),
-        },
-      ]);
-    },
-    onError: (err) => console.error(err),
-  });
-
-  const onSubmitUrl: SubmitHandler<{ url: string }> = (data) =>
-    toast.promise(scrapeMutation.mutateAsync(), {
-      error: "Something went wrong...",
-      loading: "Loading...",
-      success: () => data.url + " was scraped successfully",
-    });
-
-  const onSubmitSelector: SubmitHandler<{ selector: string }> = (data) => {
-    toast.promise(extractMutation.mutateAsync(), {
-      error: "Something went wrong...",
-      loading: "Loading...",
-      success: () => data.selector + " was used to extract data successfully",
-    });
-  };
+  const {
+    register,
+    handleSubmit,
+    onSubmitUrl,
+    onSubmitSelector,
+    drafts,
+    currentTab,
+    setCurrentTab,
+    tabs,
+    setValue,
+  } = useScrapeForm();
 
   return (
     <main className="mx-auto flex max-w-2xl flex-col gap-y-6 px-4 py-12">
