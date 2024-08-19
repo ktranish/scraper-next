@@ -7,9 +7,9 @@ import Providers from "./providers";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Scraper Next",
+  title: "Effortlessly Scrape Websites",
   description:
-    "Next.js application for scraping HTML content from specified URL.",
+    "Discover how our application simplifies scraping HTML content from any specified URL, providing you with the data you need in no time.",
 };
 
 export default function RootLayout({

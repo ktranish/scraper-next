@@ -3,6 +3,7 @@
 import { cn } from "@/utils/cn";
 import { Square2StackIcon } from "@heroicons/react/24/outline";
 import { useMutation } from "@tanstack/react-query";
+import { formatDistanceToNow } from "date-fns";
 import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
@@ -10,8 +11,8 @@ import toast from "react-hot-toast";
 import { extract, scrape } from "./actions";
 
 export default function Page() {
-  const [tab, setTab] = useState(0);
-  const [drafts, setDrafts] = useState<string[]>([]);
+  const [currentTab, setCurrentTab] = useState(0);
+  const [drafts, setDrafts] = useState<{ draft: string; date: Date }[]>([]);
   const [tabs, setTabs] = useState<{ tab: string; selector: string }[]>([]);
 
   const { register, handleSubmit, watch, setValue } = useForm<{
@@ -25,7 +26,7 @@ export default function Page() {
   const scrapeMutation = useMutation({
     mutationFn: async () => scrape(url.replaceAll("https://", "")),
     onSuccess: (data) => {
-      setTab(tabs.length);
+      setCurrentTab(tabs.length);
       setValue("url", "");
       setTabs([
         ...tabs,
@@ -34,7 +35,13 @@ export default function Page() {
           selector: "",
         },
       ]);
-      setDrafts([...drafts, data]);
+      setDrafts([
+        ...drafts,
+        {
+          draft: data,
+          date: new Date(),
+        },
+      ]);
     },
     onError: (err) => console.error(err),
   });
@@ -42,20 +49,26 @@ export default function Page() {
   const extractMutation = useMutation({
     mutationFn: async () =>
       extract(
-        "https://" + tabs.find((_, index) => index === tab)?.tab,
+        "https://" + tabs.find((_, index) => index === currentTab)?.tab,
         selector,
       ),
     onSuccess: (data) => {
-      setTab(tabs.length);
+      setCurrentTab(tabs.length);
       setValue("selector", "");
       setTabs([
         ...tabs,
         {
-          tab: tabs[tab].tab,
+          tab: tabs[currentTab].tab,
           selector,
         },
       ]);
-      setDrafts([...drafts, data]);
+      setDrafts([
+        ...drafts,
+        {
+          draft: data,
+          date: new Date(),
+        },
+      ]);
     },
     onError: (err) => console.error(err),
   });
@@ -77,19 +90,28 @@ export default function Page() {
 
   return (
     <main className="mx-auto flex max-w-2xl flex-col gap-y-6 px-4 py-12">
-      <div className="flex flex-col gap-y-4">
-        <section className="mx-auto flex max-w-sm flex-col gap-y-3 text-center">
-          <header>
-            <h1 className="text-4xl font-bold text-gray-900">Scrape Next</h1>
-          </header>
-          <p className="text-gray-500">
-            Next.js application for scraping HTML content from a specified URL.
-          </p>
-        </section>
+      <section className="flex flex-col gap-y-4">
+        <header>
+          <h1 className="text-3xl font-extrabold leading-tight text-gray-800 sm:text-4xl">
+            Effortlessly Scrape Websites
+          </h1>
+        </header>
+        <p className="text-base text-gray-600 sm:text-lg">
+          Discover how our application simplifies scraping HTML content from any
+          specified URL, providing you with the data you need in no time.
+        </p>
+      </section>
+
+      <section aria-labelledby="url-form-section">
+        <header>
+          <h2 id="url-form-section" className="sr-only">
+            Enter URL for Scraping
+          </h2>
+        </header>
         <form onSubmit={handleSubmit(onSubmitUrl)}>
           <label
             htmlFor="url"
-            className="sr-only block text-sm font-medium leading-6 text-gray-900"
+            className="block text-sm font-medium leading-6 text-gray-900"
           >
             URL
           </label>
@@ -107,21 +129,24 @@ export default function Page() {
             />
           </div>
         </form>
-        <nav
-          aria-label="Tabs"
-          className="mr-auto flex max-w-full flex-row-reverse gap-x-4 overflow-x-scroll whitespace-nowrap px-0.5 py-2"
-        >
+      </section>
+
+      <section aria-labelledby="tabs-navigation" className="flex">
+        <header className="sr-only">
+          <h2 id="tabs-navigation">Tab Navigation</h2>
+        </header>
+        <nav className="mr-auto flex max-w-full flex-row-reverse gap-x-4 overflow-x-scroll whitespace-nowrap py-2">
           {tabs
             .map((item, index) => (
               <button
                 key={index}
                 type="button"
                 onClick={() => {
-                  setTab(index);
+                  setCurrentTab(index);
                   setValue("url", tabs[index].tab);
                 }}
                 className={cn(
-                  index === tab
+                  index === currentTab
                     ? "bg-white text-gray-700 shadow-md"
                     : "text-gray-500 hover:text-gray-700",
                   "rounded-md px-3 py-2 text-sm font-medium transition-all duration-300",
@@ -132,29 +157,58 @@ export default function Page() {
             ))
             .reverse()}
         </nav>
-      </div>
-      <AnimatePresence mode="popLayout" initial={false}>
+      </section>
+
+      <AnimatePresence mode="popLayout">
         {!!drafts.length && (
-          <motion.div
+          <motion.article
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             initial={{ opacity: 0 }}
-            key={tab}
+            key={currentTab}
             className="rounded-md bg-white shadow-md"
           >
-            <nav className="flex flex-col justify-between gap-4 border-b p-4 sm:flex-row sm:items-center">
-              <h6 className="font-medium leading-6 tracking-wide">
-                {drafts.find((_, index) => index === tab)?.length} characters
-              </h6>
+            <header className="flex flex-col justify-between gap-4 border-b p-4 sm:flex-row sm:items-center">
+              <div className="flex flex-col">
+                <h3 className="font-medium leading-6 tracking-wide">
+                  {
+                    drafts.find((_, index) => index === currentTab)?.draft
+                      .length
+                  }{" "}
+                  characters
+                </h3>
+                <time
+                  className="text-sm text-gray-500"
+                  dateTime={
+                    drafts
+                      .find((_, index) => index === currentTab)
+                      ?.date.toISOString() ?? new Date().toISOString()
+                  }
+                >
+                  {formatDistanceToNow(
+                    drafts.find((_, index) => index === currentTab)?.date ??
+                      new Date(),
+                    {
+                      addSuffix: true,
+                    },
+                  )}
+                </time>
+              </div>
               <form
                 onSubmit={handleSubmit(onSubmitSelector)}
                 className="flex items-center gap-x-4"
               >
+                <label
+                  htmlFor="selector-input"
+                  className="sr-only block text-sm font-medium leading-6 text-gray-900"
+                >
+                  CSS Selector
+                </label>
                 <input
                   id="url"
                   type="text"
                   placeholder="(e.g., div.content, ul > li)"
-                  className="block w-full min-w-0 flex-1 rounded-md border-0 py-3 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-inset focus:ring-gray-300"
+                  className="block w-full min-w-0 flex-1 rounded-md border-0 py-2.5 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-inset focus:ring-gray-300"
                   autoFocus
                   {...register("selector")}
                 />
@@ -162,7 +216,8 @@ export default function Page() {
                   type="button"
                   onClick={() => {
                     navigator.clipboard.writeText(
-                      drafts.find((_, index) => index === tab) ?? "",
+                      drafts.find((_, index) => index === currentTab)?.draft ??
+                        "",
                     );
                     toast.success("Copied to clipboard!");
                   }}
@@ -170,11 +225,11 @@ export default function Page() {
                   <Square2StackIcon className="h-6 w-6 text-gray-500" />
                 </button>
               </form>
-            </nav>
-            <pre className="h-96 overflow-auto whitespace-pre p-4">
-              {drafts.find((_, index) => index === tab)}
+            </header>
+            <pre className="h-96 overflow-auto whitespace-pre p-4 text-sm">
+              {drafts.find((_, index) => index === currentTab)?.draft}
             </pre>
-          </motion.div>
+          </motion.article>
         )}
       </AnimatePresence>
     </main>
