@@ -60,6 +60,7 @@ export default function Page() {
               placeholder="www.example.com"
               className="block w-full min-w-0 flex-1 rounded-none border-0 py-3 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-inset focus:ring-gray-300"
               autoFocus
+              required
               {...register("url")}
             />
             <button className="rounded-none rounded-r-md border border-l-0 border-gray-300 bg-green-50 px-3 py-2 text-gray-500">
@@ -163,6 +164,7 @@ export default function Page() {
                     placeholder="(e.g., div.content, ul > li)"
                     className="block w-full min-w-0 flex-1 rounded-none rounded-l-md border-0 py-2.5 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-inset focus:ring-gray-300"
                     autoFocus
+                    required
                     {...register("selector")}
                   />
                   <button
