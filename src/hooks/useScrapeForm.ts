@@ -9,7 +9,7 @@ export const useScrapeForm = () => {
   const [drafts, setDrafts] = useState<{ draft: string; date: Date }[]>([]);
   const [tabs, setTabs] = useState<{ tab: string; selector: string }[]>([]);
 
-  const { register, handleSubmit, watch, setValue } = useForm<{
+  const { register, handleSubmit, watch } = useForm<{
     url: string;
     selector: string;
   }>();
@@ -21,7 +21,6 @@ export const useScrapeForm = () => {
     mutationFn: async () => scrape(url.replaceAll("https://", "")),
     onSuccess: (data) => {
       setCurrentTab(tabs.length);
-      setValue("url", "");
       setTabs([...tabs, { tab: url.replaceAll("https://", ""), selector: "" }]);
       setDrafts([...drafts, { draft: data, date: new Date() }]);
     },
@@ -36,7 +35,6 @@ export const useScrapeForm = () => {
       ),
     onSuccess: (data) => {
       setCurrentTab(tabs.length);
-      setValue("selector", "");
       setTabs([...tabs, { tab: tabs[currentTab].tab, selector }]);
       setDrafts([...drafts, { draft: data, date: new Date() }]);
     },
@@ -66,6 +64,5 @@ export const useScrapeForm = () => {
     currentTab,
     setCurrentTab,
     tabs,
-    setValue,
   };
 };

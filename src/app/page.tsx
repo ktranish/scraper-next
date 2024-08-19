@@ -20,7 +20,6 @@ export default function Page() {
     currentTab,
     setCurrentTab,
     tabs,
-    setValue,
   } = useScrapeForm();
 
   return (
@@ -80,10 +79,7 @@ export default function Page() {
               <button
                 key={index}
                 type="button"
-                onClick={() => {
-                  setCurrentTab(index);
-                  setValue("url", tabs[index].tab);
-                }}
+                onClick={() => setCurrentTab(index)}
                 className={cn(
                   index === currentTab
                     ? "bg-white text-gray-700 shadow-md"
