@@ -9,7 +9,7 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Scrape and extract",
   description:
-    "Scrape a website of your choice by entering the url and specifying certain selectors to help extract your desired data.",
+    "Scrape a website of your choice by entering the URL and specifying selectors to extract your desired data.",
 };
 
 export default function RootLayout({

@@ -100,8 +100,8 @@ export default function Page() {
           </h1>
         </header>
         <p className="text-base text-gray-600 sm:text-lg">
-          Scrape a website of your choice by entering the url and specifying
-          certain selectors to help extract your desired data.
+          Scrape a website of your choice by entering the URL and specifying
+          selectors to extract your desired data.
         </p>
       </section>
 
