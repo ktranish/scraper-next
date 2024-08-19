@@ -1,7 +1,10 @@
 "use client";
 
 import { cn } from "@/utils/cn";
-import { Square2StackIcon } from "@heroicons/react/24/outline";
+import {
+  ArrowTopRightOnSquareIcon,
+  Square2StackIcon,
+} from "@heroicons/react/24/outline";
 import { useMutation } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
 import { AnimatePresence, motion } from "framer-motion";
@@ -93,12 +96,12 @@ export default function Page() {
       <section className="flex flex-col gap-y-4">
         <header>
           <h1 className="text-3xl font-extrabold leading-tight text-gray-800 sm:text-4xl">
-            Effortlessly Scrape Websites
+            Scrape and extract
           </h1>
         </header>
         <p className="text-base text-gray-600 sm:text-lg">
-          Discover how our application simplifies scraping HTML content from any
-          specified URL, providing you with the data you need in no time.
+          Scrape a website of your choice by entering the url and specifying
+          certain selectors to help extract your desired data.
         </p>
       </section>
 
@@ -123,10 +126,13 @@ export default function Page() {
               id="url"
               type="text"
               placeholder="www.example.com"
-              className="block w-full min-w-0 flex-1 rounded-none rounded-r-md border-0 py-3 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-inset focus:ring-gray-300"
+              className="block w-full min-w-0 flex-1 rounded-none border-0 py-3 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-inset focus:ring-gray-300"
               autoFocus
               {...register("url")}
             />
+            <button className="rounded-none rounded-r-md border border-l-0 border-gray-300 bg-green-50 px-3 py-2 text-gray-500">
+              Scrape
+            </button>
           </div>
         </form>
       </section>
@@ -166,17 +172,31 @@ export default function Page() {
             exit={{ opacity: 0 }}
             initial={{ opacity: 0 }}
             key={currentTab}
-            className="rounded-md bg-white shadow-md"
+            className="rounded-md border border-gray-300 bg-white"
           >
-            <header className="flex flex-col justify-between gap-4 border-b p-4 sm:flex-row sm:items-center">
+            <header className="flex flex-col justify-between gap-4 border-b border-gray-300 p-4 sm:flex-row sm:items-center">
               <div className="flex flex-col">
-                <h3 className="font-medium leading-6 tracking-wide">
-                  {
-                    drafts.find((_, index) => index === currentTab)?.draft
-                      .length
-                  }{" "}
-                  characters
-                </h3>
+                <div className="flex items-center gap-x-1.5">
+                  <h3 className="font-medium leading-6 tracking-wide">
+                    {
+                      drafts.find((_, index) => index === currentTab)?.draft
+                        .length
+                    }{" "}
+                    characters
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText(
+                        drafts.find((_, index) => index === currentTab)
+                          ?.draft ?? "",
+                      );
+                      toast.success("Copied to clipboard!");
+                    }}
+                  >
+                    <Square2StackIcon className="h-4 w-4 text-gray-500" />
+                  </button>
+                </div>
                 <time
                   className="text-sm text-gray-500"
                   dateTime={
@@ -204,30 +224,28 @@ export default function Page() {
                 >
                   CSS Selector
                 </label>
-                <input
-                  id="url"
-                  type="text"
-                  placeholder="(e.g., div.content, ul > li)"
-                  className="block w-full min-w-0 flex-1 rounded-md border-0 py-2.5 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-inset focus:ring-gray-300"
-                  autoFocus
-                  {...register("selector")}
-                />
-                <button
-                  type="button"
-                  onClick={() => {
-                    navigator.clipboard.writeText(
-                      drafts.find((_, index) => index === currentTab)?.draft ??
-                        "",
-                    );
-                    toast.success("Copied to clipboard!");
-                  }}
-                >
-                  <Square2StackIcon className="h-6 w-6 text-gray-500" />
-                </button>
+                <div className="flex w-full">
+                  <input
+                    id="url"
+                    type="text"
+                    placeholder="(e.g., div.content, ul > li)"
+                    className="block w-full min-w-0 flex-1 rounded-none rounded-l-md border-0 py-2.5 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-inset focus:ring-gray-300"
+                    autoFocus
+                    {...register("selector")}
+                  />
+                  <button
+                    aria-label="Submit CSS selector"
+                    className="rounded-none rounded-r-md border border-l-0 border-gray-300 bg-yellow-50 px-3 py-2 text-gray-500"
+                  >
+                    <ArrowTopRightOnSquareIcon className="h-5 w-5" />
+                  </button>
+                </div>
               </form>
             </header>
             <pre className="h-96 overflow-auto whitespace-pre p-4 text-sm">
-              {drafts.find((_, index) => index === currentTab)?.draft}
+              <code>
+                {drafts.find((_, index) => index === currentTab)?.draft}
+              </code>
             </pre>
           </motion.article>
         )}

@@ -7,9 +7,9 @@ import Providers from "./providers";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Effortlessly Scrape Websites",
+  title: "Scrape and extract",
   description:
-    "Discover how our application simplifies scraping HTML content from any specified URL, providing you with the data you need in no time.",
+    "Scrape a website of your choice by entering the url and specifying certain selectors to help extract your desired data.",
 };
 
 export default function RootLayout({
